@@ -3,6 +3,7 @@ local base = require 'melsec.frame.base'
 local frame = class('LUA_MELSEC_FRAME_4E_BIN', base)
 
 function frame:initialize(sequence, network, index, io, station, status, data)
+	base.initialize(self)
 	self._sequence = sequence
 	self._network = network
 	self._index = index
