@@ -2,23 +2,20 @@ local base = require 'melsec.frame.base'
 
 local frame = class('LUA_MELSEC_FRAME_4C_FORMAT_5_BIN', base)
 
-function frame:initialize(network, index, io, station, cmd, sub_cmd, data)
+function frame:initialize(network, index, io, station, command)
 	base.initialize(self)
 	self._network = network
 	self._index = index
 	self._io = io
 	self._station = station
-	self._cmd = cmd
-	self._sub_cmd = sub_cmd
-	self._data = data
+	self._command = command
 end
 
 function frame:to_hex()
 	local pre = string.pack('>I2', 0x1002)
 	local pos = string.pack('>I2', 0x1003)
 
-	local data_p = string.pack('<I2I2', self._cmd, self._sub_cmd)
-	local data = data_p .. self._data:to_hex()
+	local data = self._command:to_hex()
 	local data_len = string.len(data) + 8
 
 	--- 0x00 站号???
@@ -54,9 +51,7 @@ function frame:from_hex(raw, index)
 	assert(site == 0x00)
 	assert(this_site == 0x00)
 
-	self._cmd, self._sub_cmd, index = string.unpack('<I2I2', raw, index)
-
-	self._data, index = parser(raw, index)
+	self._command, index = parser(raw, index)
 
 	local pos, sum, index = string.unpack('>I2I2', raw, index)
 	assert(pos == 0x1003)
@@ -85,16 +80,8 @@ function frame:tiemr()
 	return self._timer
 end
 
-function frame:cmd()
-	return self._cmd
-end
-
-function frame:sub_cmd()
-	return self._sub_cmd
-end
-
-function frame:data()
-	return self._data
+function frame:command()
+	return self._command
 end
 
 return frame

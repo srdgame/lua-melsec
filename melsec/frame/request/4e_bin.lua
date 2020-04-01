@@ -2,7 +2,7 @@ local base = require 'melsec.frame.base'
 
 local frame = class('LUA_MELSEC_FRAME_4E_BIN', base)
 
-function frame:initialize(sequence, network, index, io, station, timer, cmd, sub_cmd, data)
+function frame:initialize(sequence, network, index, io, station, timer, command)
 	base.initialize(self)
 	self._sequence = sequence
 	self._network = network
@@ -10,16 +10,14 @@ function frame:initialize(sequence, network, index, io, station, timer, cmd, sub
 	self._io = io
 	self._station = station
 	self._timer = timer
-	self._cmd = cmd
-	self._sub_cmd = sub_cmd
-	self._data = data
+	self._command = command
 end
 
 function frame:to_hex()
 	local hdr = string.pack('>I2', 0x5400)..string.pack('<I2', self._sequence)..string.pack('>I2', 0x0000)
 
-	local data_p = string.pack('<I2I2I2', self._timer, self._cmd, self._sub_cmd)
-	local data = data_p .. self._data:to_hex()
+	local data_p = string.pack('<I2', self._timer)
+	local data = data_p .. self._command:to_hex()
 	local data_len = string.len(data)
 
 	local qhdr = string.pack('<I1I1I2I1I2', self._network, self._index, self._io, self._station, data_len)
@@ -45,9 +43,9 @@ function frame:from_hex(raw, index)
 		return nil, data_len - str_left
 	end
 
-	self._timer, self._cmd, self._sub_cmd, index = string.unpack('<I2I2I2', raw, index)
+	self._timer, index = string.unpack('<I2', raw, index)
 
-	self._data, index = parser(raw, index)
+	self._command, index = parser(raw, index)
 
 	assert(index = data_len + 13, "Incorrect index returned!")
 
@@ -78,16 +76,8 @@ function frame:tiemr()
 	return self._timer
 end
 
-function frame:cmd()
-	return self._cmd
-end
-
-function frame:sub_cmd()
-	return self._sub_cmd
-end
-
-function frame:data()
-	return self._data
+function frame:command()
+	return self._command
 end
 
 return frame
