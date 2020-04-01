@@ -54,7 +54,9 @@ function read:encode()
 			data[#data + 1] = self:pack('I1', v)
 		end
 	else
-		--TODO:
+		for _, v in ipairs(self._values) do
+			data[#data + 1] = self:pack('I2', v)
+		end
 	end
 
 	return pre..table.concat(data)
