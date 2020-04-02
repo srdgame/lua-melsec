@@ -1,26 +1,29 @@
 local base = require 'melsec.frame.base'
+local parser = require 'melsec.command.reply.parser'
+local session = require 'melsec.session'
 
 local frame = class('LUA_MELSEC_FRAME_4E_BIN', base)
 
-function frame:initialize(sequence, network, index, io, station, timer, command)
+function frame:initialize(session, command)
 	base.initialize(self)
-	self._sequence = sequence
-	self._network = network
-	self._index = index
-	self._io = io
-	self._station = station
-	self._timer = timer
+	self._session = session
 	self._command = command
 end
 
 function frame:to_hex()
-	local hdr = string.pack('>I2', 0x5400)..string.pack('<I2', self._sequence)..string.pack('>I2', 0x0000)
+	local sequence = self._session:gen_seq()
+	local hdr = string.pack('>I2', 0x5400)..string.pack('<I2', sequence)..string.pack('>I2', 0x0000)
 
-	local data_p = string.pack('<I2', self._timer)
+	local data_p = string.pack('<I2', self._sesssion:timer())
 	local data = data_p .. self._command:to_hex()
 	local data_len = string.len(data)
 
-	local qhdr = string.pack('<I1I1I2I1I2', self._network, self._index, self._io, self._station, data_len)
+	local network = self._session:network()
+	local index = self._session:index()
+	local io = self._session:io()
+	local station = self._session:station()
+
+	local qhdr = string.pack('<I1I1I2I1I2', network, index, io, station, data_len)
 
 
 	return hdr..qhdr..data
@@ -33,47 +36,32 @@ function frame:from_hex(raw, index)
 	local ed, index = string.unpack('>I2', raw, index)
 	assert(ed == 0x0000)
 
-	self._sequence = seq
-
-	local data_len = 0
-	self._network, self._index, self._io, self._station, data_len, index = string.unpack('<I1I1I2I1I2')
+	local network, sindex, io, station, data_len, index = string.unpack('<I1I1I2I1I2')
 
 	local str_left = string.len(raw) - index + 1
 	if data_len > str_left then
 		return nil, data_len - str_left
 	end
 
-	self._timer, index = string.unpack('<I2', raw, index)
+	local timer, index = string.unpack('<I2', raw, index)
 
-	self._command, index = parser(raw, index)
+	local new_index = 1
+	local new_raw = string.sub(raw, index, index + data_len - 2)
 
-	assert(index = data_len + 13, "Incorrect index returned!")
+	local basexx = require 'basexx'
+	print('FROM_HEX', basexx.to_hex(new_raw))
 
-	return index
+	self._command, new_index = parser(new_raw, new_index)
+	self._session = session:new(network, sindex, io, station, timer)
+	self._session:set_seq(seq)
+
+	assert(new_index = data_len - 2 + 1, "Incorrect index returned!")
+
+	return index + new_index
 end
 
-function frame:sequence()
-	return self._sequence
-end
-
-function frame:network()
-	return self._network
-end
-
-function frame:index()
-	return self._index
-end
-
-function frame:io()
-	return self._io
-end
-
-function frame:station()
-	return self._station
-end
-
-function frame:tiemr()
-	return self._timer
+function frame:session()
+	return self._session
 end
 
 function frame:command()
