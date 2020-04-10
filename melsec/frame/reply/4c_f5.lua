@@ -1,13 +1,13 @@
+local class = require 'middleclass'
+
+local session = require 'melsec.session'
 local base = require 'melsec.frame.base'
 
 local frame = class('LUA_MELSEC_FRAME_4C_FORMAT_5_BIN', base)
 
-function frame:initialize(network, index, io, station, status, data)
+function frame:initialize(session, status, data)
 	base.initialize(self)
-	self._network = network
-	self._index = index
-	self._io = io
-	self._station = station
+	self._session = session
 	self._status = status
 	self._data = data
 end
@@ -23,7 +23,13 @@ function frame:to_hex()
 
 	local data_len = string.len(data) + 10
 
-	local qhdr = string.pack('<I2I1I1I1I2I1I1', data_len, 0xF8, 0x00, self._network, self._index, self._io, self._station, 0x00)
+	local sequence = self._session:get_seq()
+	local network = self._session:network()
+	local index = self._session:index()
+	local io = self._session:io()
+	local station = self._session:station()
+
+	local qhdr = string.pack('<I2I1I1I1I2I1I1', data_len, 0xF8, 0x00, network, index, io, station, 0x00)
 
 	data = qhdr..data
 
@@ -47,13 +53,12 @@ function frame:from_hex(raw, index)
 	local sum = string.unpack('>I2', string.sub(raw, index + data_len + 2))
 	-- TODO: check sum
 
-	local ver = 0
-	local site = 0
-	local this_site = 0
-	ver, site, self._network, self._index, self._io, self._station, this_site, index = string.unpack('<I1I1I1I1I2I1I1')
+	local ver, site, network, p_index, io, station, this_site, index = string.unpack('<I1I1I1I1I2I1I1')
 	assert(ver == 0xF8)
 	assert(site == 0x00)
 	assert(this_site == 0x00)
+
+	self._session = session:new(network, p_index, io, station)
 
 	local rp
 	rp, self._status, index = string.unpack('<I2I2', raw, index)
@@ -71,19 +76,7 @@ function frame:from_hex(raw, index)
 	return index
 end
 
-function frame:network()
-	return self._network
-end
-
-function frame:index()
-	return self._index
-end
-
-function frame:io()
-	return self._io
-end
-
-function frame:station()
+function frame:session()
 	return self._station
 end
 

@@ -2,13 +2,13 @@ local class = require 'middleclass'
 
 local session = class('LUA_MELSEC_SESSION')
 
-function session:initialize(network, index, io, station, timer)
+function session:initialize(network, index, io, station, timer, sequence)
 	self._network = network
 	self._index = index
 	self._io = io
 	self._station = station
-	self._timer = timer
-	self._seq = 0
+	self._timer = timer or 0x10
+	self._seq = sequence or 0
 end
 
 function session:gen_seq()
@@ -20,7 +20,7 @@ function session:set_seq(seq)
 	self._seq = seq
 end
 
-function session:sequence()
+function session:get_seq()
 	return self._seq
 end
 

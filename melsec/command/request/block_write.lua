@@ -8,7 +8,7 @@ local read = class('LUA_MELSEC_COMMAND_REQUEST_BLOCK_READ', base)
 
 function read:initialize(ascii, word_or_bit, name, index, values)
 	local sub_cmd = word_or_bit and types.SUB_CMD.WORD or types.SUB_CMD.BIT
-	base.initialize(ascii, types.CMD.BLOCK_WRITE, sub_cmd)
+	base.initialize(self, ascii, types.CMD.BLOCK_WRITE, sub_cmd)
 	self._name = name
 	self._index = index
 	self._values = values

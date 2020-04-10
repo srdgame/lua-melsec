@@ -8,7 +8,7 @@ local read = class('LUA_MELSEC_COMMAND_REQUEST_BLOCK_READ', base)
 
 function read:initialize(ascii, word_or_bit, name, index, count)
 	local sub_cmd = word_or_bit and types.SUB_CMD.WORD or types.SUB_CMD.BIT
-	base.initialize(ascii, types.CMD.BLOCK_READ, sub_cmd)
+	base.initialize(self, ascii, types.CMD.BLOCK_READ, sub_cmd)
 	self._name = name
 	self._index = index
 	self._count = count
@@ -23,8 +23,12 @@ function read:encode_sc(sc)
 		assert(string.len(sc_name) == 2)
 		return sc_name .. self:pack('I3I2', sc.index, sc.count)
 	else
-		local code = types.SC[sc.name]
-		assert(code, 'Incorrect Soft Component')
+		local sc_name = sc.name
+		if string.sub(sc_name, -1) == '*' then
+			sc_name = string.sub(sc_name, 1, -2)
+		end
+		local code = types.SC[sc_name]
+		assert(code, 'Incorrect Soft Component:'..sc_name)
 		return self:pack('I3I1I2', sc.index, code, sc.count)
 	end
 end

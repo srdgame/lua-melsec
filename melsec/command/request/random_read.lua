@@ -7,7 +7,7 @@ local read = class('LUA_MELSEC_COMMAND_REQUEST_RANDOM_READ', base)
 
 
 function read:initialize(ascii, words, dwords)
-	base.initialize(ascii, types.CMD.RANDOM_READ, types.SUB_CMD.WORD)
+	base.initialize(self, ascii, types.CMD.RANDOM_READ, types.SUB_CMD.WORD)
 	self._words = words or {}
 	self._dwords = dwords or {}
 end

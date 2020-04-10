@@ -7,7 +7,7 @@ local read = class('LUA_MELSEC_COMMAND_REPLY_RANDOM_READ', base)
 
 
 function read:initialize(ascii, values)
-	base.initialize(ascii, types.CMD.RANDOM_READ, types.SUB_CMD.WORD)
+	base.initialize(self, ascii, types.CMD.RANDOM_READ, types.SUB_CMD.WORD)
 	self._values = values
 end
 

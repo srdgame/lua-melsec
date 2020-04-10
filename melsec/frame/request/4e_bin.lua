@@ -1,3 +1,5 @@
+local class = require 'middleclass'
+
 local base = require 'melsec.frame.base'
 local parser = require 'melsec.command.reply.parser'
 local session = require 'melsec.session'
@@ -5,6 +7,8 @@ local session = require 'melsec.session'
 local frame = class('LUA_MELSEC_FRAME_4E_BIN', base)
 
 function frame:initialize(session, command)
+	assert(session, "Session missing")
+	assert(command, "Command missing")
 	base.initialize(self)
 	self._session = session
 	self._command = command
@@ -14,7 +18,7 @@ function frame:to_hex()
 	local sequence = self._session:gen_seq()
 	local hdr = string.pack('>I2', 0x5400)..string.pack('<I2', sequence)..string.pack('>I2', 0x0000)
 
-	local data_p = string.pack('<I2', self._sesssion:timer())
+	local data_p = string.pack('<I2', self._session:timer())
 	local data = data_p .. self._command:to_hex()
 	local data_len = string.len(data)
 
@@ -55,7 +59,7 @@ function frame:from_hex(raw, index)
 	self._session = session:new(network, sindex, io, station, timer)
 	self._session:set_seq(seq)
 
-	assert(new_index = data_len - 2 + 1, "Incorrect index returned!")
+	assert(new_index == data_len - 2 + 1, "Incorrect index returned!")
 
 	return index + new_index
 end

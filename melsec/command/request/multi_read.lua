@@ -7,7 +7,7 @@ local read = class('LUA_MELSEC_COMMAND_REQUEST_MULTI_READ', base)
 
 
 function read:initialize(ascii, words, bits)
-	base.initialize(ascii, types.CMD.MULTI_READ, types.SUB_CMD.WORD)
+	base.initialize(self, ascii, types.CMD.MULTI_READ, types.SUB_CMD.WORD)
 	self._words = words or {}
 	self._bits = bits or {}
 end

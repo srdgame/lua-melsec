@@ -15,7 +15,7 @@ end
 
 function base:pack(fmt, ...)
 	local be = self._ascii and '>' or '<'
-	local data = string.format(be..fmt, ...)
+	local data = string.pack(be..fmt, ...)
 	if self._ascii then
 		data = basexx.to_hex(data)	
 	end
