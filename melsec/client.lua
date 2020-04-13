@@ -3,6 +3,7 @@ local session = require 'melsec.session'
 local utils_conn_path = require 'melsec.utils.conn_path'
 
 local block_read = require 'melsec.command.request.block_read'
+local cmd_types = require 'melsec.command.types'
 
 local client = class("LUA_MELSEC_CLIENT")
 
@@ -72,6 +73,18 @@ function client:on_reply(request, raw)
 	end
 
 	return self._reply_frame, index
+end
+
+function client:read_sc(name, index, count, response)
+	local sc_name = name
+	if string.len(sc_name) == 2 and string.sub(2,2) == '*' then
+		sc_name = string.sub(sc_name, 1,1)
+	end
+	if 'BIT' == cmd_types.SC_VALUE_TYPE[sc_name] then
+		return self:read_bits(name, index, count, response)
+	else
+		return self:read_words(name, index, count, response)
+	end
 end
 
 function client:read_words(name, index, count, response)

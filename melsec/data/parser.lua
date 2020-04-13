@@ -17,19 +17,24 @@ function parser:initialize(ascii)
 	self._ascii = ascii
 end
 
-function parser:__call(fmt, data, index)
+function parser:__call(fmt, data, index, raw_len)
 	assert(data and fmt, 'Data format')
 	
 	if fmt == 'bit' then
-		return self:bit(data, index)
+		return self:bit_bin(data, index)
 	end
 
 	local bf = self._ascii and '>' or '<'
 
-	local fmt = data_fmts[fmt]
-	assert(fmt)
+	if fmt == 'raw' or fmt == 'string' then
+		assert(raw_len, 'String/raw length needed')
+		return string.unpack(bf..'c'..raw_len, data, index)
+	end
 
-	return string.unpack(bf..fmt, data, index)
+	local dfmt = data_fmts[fmt]
+	assert(dfmt, string.format('Format: %s is not supported', fmt))
+
+	return string.unpack(bf..dfmt, data, index)
 end
 
 function parser:bit_ascii(data, index)
@@ -45,9 +50,9 @@ function parser:bit_bin(data, index)
 	local val = string.unpack('I1', new_index)
 
 	if lf then
-		return (val >> 4) & 0xF
+		return (val >> 4) & 0xF, index + 1
 	else
-		return val & 0xF
+		return val & 0xF, index + 1
 	end
 
 	return index + 1

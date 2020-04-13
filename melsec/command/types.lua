@@ -46,8 +46,42 @@ local SC = {
 	W	= 0xB4,
 }
 
+local SC_VALUE_TYPE = {
+	SM	= 'BIT',
+	SD	= 'WORD',
+	X	= 'BIT',
+	Y	= 'BIT',
+	M	= 'BIT',
+	L	= 'BIT',
+	F	= 'BIT',
+	V	= 'BIT',
+	B	= 'BIT',
+	D	= 'WORD',
+	W	= 'WORD',
+	TS	= 'BIT',
+	TC	= 'BIT',
+	TN	= 'WORD',
+	SS	= 'BIT',
+	SC	= 'BIT',
+	SN	= 'WORD',
+	CS	= 'BIT',
+	CC	= 'BIT',
+	CN	= 'WORD',
+	SB	= 'BIT',
+	SW	= 'WORD',
+	S	= 'BIT',
+	DX	= 'BIT',
+	DY	= 'BIT',
+	Z	= 'WORD',
+	R	= 'WORD',
+	ZR	= 'WORD',
+	D	= 'WORD',
+	W	= 'WORD',
+}
+
 return {
 	CMD = CMD,
 	SUB_CMD = SUB_CMD,
 	SC = SC,
+	SC_VALUE_TYPE = SC_VALUE_TYPE,
 }
