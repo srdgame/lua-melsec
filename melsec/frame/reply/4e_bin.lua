@@ -43,7 +43,6 @@ function frame:from_hex(raw, index)
 	assert(ed == 0x0000)
 
 	local network, p_index, io, station, data_len, index = string.unpack('<I1I1I2I1I2', raw, index)
-	print(data_len)
 
 	self._session = session:new(network, p_index, io, station, nil, seq)
 
@@ -53,6 +52,7 @@ function frame:from_hex(raw, index)
 	end
 
 	self._status, index = string.unpack('<I2', raw, index)
+	--print('REPLY STATUS', self._status, string.format('%02X', self._status))
 
 	self._data, index = string.unpack('<c'..(data_len - 2), raw, index)
 

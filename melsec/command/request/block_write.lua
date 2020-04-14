@@ -3,18 +3,19 @@ local base = require 'melsec.command.base'
 local types = require 'melsec.command.types'
 local basexx = require 'basexx'
 
-local read = class('LUA_MELSEC_COMMAND_REQUEST_BLOCK_READ', base)
+local write = class('LUA_MELSEC_COMMAND_REQUEST_BLOCK_WRITE', base)
 
 
-function read:initialize(ascii, word_or_bit, name, index, values)
+function write:initialize(ascii, word_or_bit, name, index, values, raw_values)
 	local sub_cmd = word_or_bit and types.SUB_CMD.WORD or types.SUB_CMD.BIT
 	base.initialize(self, ascii, types.CMD.BLOCK_WRITE, sub_cmd)
 	self._name = name
 	self._index = index
 	self._values = values
+	self._raw_values = raw_values
 end
 
-function read:encode_sc(sc)
+function write:encode_sc(sc)
 	if self:ascii() then
 		local sc_name = sc.name
 		if string.len(sc_name) == 1 then
@@ -39,7 +40,11 @@ local function bit_value(bit)
 	return 0
 end
 
-function read:encode()
+function write:encode()
+	if self._raw_values then
+		return self:encode_raw()
+	end
+
 	local count = #self._values
 	local pre = self:encode_sc({name=self._name, index = self._index, count = count})
 
@@ -62,12 +67,27 @@ function read:encode()
 	return pre..table.concat(data)
 end
 
-function read:decode(raw, index)
+function write:encode_raw()
+	local count = self._values.count
+	local data = self._values.data
+
+	local pre = self:encode_sc({name=self._name, index = self._index, count = count})
+
+	if self:sub_cmd() == types.SUB_CMD.BIT then
+		--- TODO:
+	else
+		--- TODO:
+	end
+
+	return pre..data
+end
+
+function write:decode(raw, index)
 	assert(nil, 'Not suppported')
 end
 
-function read:__tostring()
+function write:__tostring()
 	return base.__tostring(self)
 end
 
-return read
+return write

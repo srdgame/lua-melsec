@@ -53,8 +53,10 @@ function frame:from_hex(raw, index)
 	local new_index = 1
 	local new_raw = string.sub(raw, index, index + data_len - 8)
 
+	--[[
 	local basexx = require 'basexx'
 	print('FROM_HEX', basexx.to_hex(new_raw))
+	]]--
 
 	self._command, index = parser(raw, index)
 	self._session = session:new(network, sindex, io, station)
