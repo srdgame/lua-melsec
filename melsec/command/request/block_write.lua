@@ -55,11 +55,13 @@ function write:encode()
 		end
 
 		for i = 1, #self._values, 2 do
+			print('write bit value', self._values[i])
 			local v = bit_value(self._values[i]) << 4 + bit_value(self._values[i + 1])
 			data[#data + 1] = self:pack('I1', v)
 		end
 	else
 		for _, v in ipairs(self._values) do
+			print('write word value', v)
 			data[#data + 1] = self:pack('I2', v)
 		end
 	end

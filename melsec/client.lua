@@ -143,9 +143,10 @@ end
 function client:write_words(sc, response)
 	local cmd = nil
 
+	local val = nil
 	if #sc.values == 1 then
 		local val_fmt = sc.values[1].fmt
-		local val_val = sc.values[1].val
+		val = sc.values[1].val
 		if val_fmt == 'bit' or val_fmt == 'int8' or val_fmt == 'uint8' then
 			return response(nil, "Write does not support bit/int8/uint8 write on word")
 		end
@@ -153,7 +154,7 @@ function client:write_words(sc, response)
 		return reponse(nil, "Write with multiple values is not supported yet!")
 	end
 
-	local cmd = block_write(self._ascii, true, sc.sc_name, sc.index, sc.values)
+	local cmd = block_write(self._ascii, true, sc.sc_name, sc.index, {val})
 	local req = self._request_frame:new(self._session, cmd)
 	return self:request(req, function(reply, err)
 		if not reply then
